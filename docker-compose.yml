@@ -7,7 +7,7 @@ services:
     volumes:
       - ./templates:/usr/share/nginx/html:ro
     ports:
-      - "80:80"
+      - "8080:80"
 
   samba:
     image: dperson/samba:latest
@@ -15,8 +15,8 @@ services:
     tty: true
     restart: always
     ports:
-      # - "137:137/udp"
-      # - "138:138/udp"
+      - "137:137/udp"
+      - "138:138/udp"
       - "139:139/tcp"
       - "445:445/tcp"
     stdin_open: true
@@ -24,9 +24,9 @@ services:
       TZ: 'America/Lima'
     networks:
       - default
-  #   read_only: true
-  #   tmpfs:
-  #     - /tmp
+    read_only: true
+    tmpfs:
+      - /tmp
     volumes:
       - ./files:/samba/files
     command: '-u "alexpi;password;1000;alexpi;1000" -s "AlexPiDocs;/samba/files/alexpi;yes;no;yes;alexpi;alexpi;Alexpi documents"'
