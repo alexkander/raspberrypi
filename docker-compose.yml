@@ -71,7 +71,7 @@ services:
 # {% endif %}
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:10.1.2
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
