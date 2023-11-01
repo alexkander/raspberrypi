@@ -142,7 +142,7 @@ services:
       - ./volumens/samba/files:/samba/files
     command: '-u "alexpi;password;1000;alexpi;1000" -s "AlexPiDocs;/samba/files/alexpi;yes;no;yes;alexpi;alexpi;Alexpi documents"'
     networks:
-      - default
+      - front-tier
 
   web:
     image: nginx
