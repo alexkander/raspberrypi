@@ -13,6 +13,7 @@ networks:
 services:
   portainer:
     image: portainer/portainer-ce:latest
+    container_name: portainer
     ports:
       - 9000:9000
       # - 9443:9443
@@ -26,6 +27,7 @@ services:
 
   nodeexp:
     image: prom/node-exporter:latest
+    container_name: nodeexp
     restart: always
     privileged: true
     volumes:
@@ -45,6 +47,7 @@ services:
 
   ping:
     image: prom/blackbox-exporter:latest
+    container_name: ping
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -62,6 +65,7 @@ services:
       
   speedtest:
     image: miguelndecarvalho/speedtest-exporter:latest
+    container_name: speedtest
     restart: always
     expose:
       - 9798
@@ -72,6 +76,7 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
+    container_name: prometheus
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -129,3 +134,13 @@ services:
     command: '-u "alexpi;password;1000;alexpi;1000" -s "AlexPiDocs;/samba/files/alexpi;yes;no;yes;alexpi;alexpi;Alexpi documents"'
     networks:
       - front-tier
+
+  # web:
+  #   image: nginx
+  #   restart: always
+  #   volumes:
+  #     - ./templates:/usr/share/nginx/html:ro
+  #   ports:
+  #     - 8080:80
+  #   networks:
+  #     - front-tier
