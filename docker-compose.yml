@@ -43,33 +43,53 @@ services:
     networks:
       - back-tier
 
-  # prometheus:
-  #   image: prom/prometheus:latest
-  #   restart: always
-  #   volumes:
-  #     # - /etc/localtime:/etc/localtime:ro
-  #     - ./config/prometheus/:/etc/prometheus/
-  #     - prometheus_data:/prometheus
-  #   command:
-  #     - '--config.file=/etc/prometheus/prometheus.yml'
-  #     - '--storage.tsdb.path=/prometheus'
-  #     - '--storage.tsdb.retention.time=90d'
-  #     - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-  #     - '--web.console.templates=/usr/share/prometheus/consoles'
-  #   ports:
-  #     - 9090:9090
-  #   links:
-  #     - ping:ping
-  #     - speedtest:speedtest
-  #   networks:
-  #     - back-tier
-# {% if domain_name_enable and domain_name and domain_prometheus %}
-#     depends_on:
-#       - nginx-proxy
-#     environment:
-#       - VIRTUAL_HOST={{ domain_prometheus }}.{{ domain_name }}
-#       - VIRTUAL_PORT=9090
-# {% endif %}
+  ping:
+    image: prom/blackbox-exporter:latest
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./config/blackbox/config:/config
+    expose:
+      - 9115
+    ports:
+      - 9115:9115
+    tty: true
+    stdin_open: true
+    command:
+      - '--config.file=/config/blackbox.yml'
+    networks:
+      - back-tier
+      
+  speedtest:
+    image: miguelndecarvalho/speedtest-exporter:latest
+    restart: always
+    expose:
+      - 9798
+    ports:
+      - 9798:9798
+    networks:
+      - back-tier
+
+  prometheus:
+    image: prom/prometheus:latest
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./config/prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=90d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - 9090:9090
+    links:
+      - ping:ping
+      - speedtest:speedtest
+    networks:
+      - back-tier
 
   # grafana:
   #   image: grafana/grafana:10.1.2
@@ -87,40 +107,6 @@ services:
   #   networks:
   #     - back-tier
   #     - front-tier
-# {% if domain_name_enable and domain_name and domain_grafana %}
-#     depends_on:
-#       - nginx-proxy
-#     environment:
-#       - VIRTUAL_HOST=grafana.localhost:3030
-#       - VIRTUAL_PORT=3000
-# {% endif %}
-
-  # ping:
-  #   image: prom/blackbox-exporter:latest
-  #   restart: always
-  #   volumes:
-  #     - /etc/localtime:/etc/localtime:ro
-  #     - ./config/blackbox/config:/config
-  #   expose:
-  #     - 9115
-  #   ports:
-  #     - 9115:9115
-  #   tty: true
-  #   stdin_open: true
-  #   command:
-  #     - '--config.file=/config/blackbox.yml'
-  #   networks:
-  #     - back-tier
-      
-  # speedtest:
-  #   image: miguelndecarvalho/speedtest-exporter:latest
-  #   restart: always
-  #   expose:
-  #     - 9798
-  #   ports:
-  #     - 9798:9798
-  #   networks:
-  #     - back-tier
 
   samba:
     image: dperson/samba:latest
