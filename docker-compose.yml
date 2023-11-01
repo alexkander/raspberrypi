@@ -6,7 +6,6 @@ volumes:
   grafana_data: {}
 
 networks:
-  default:
   front-tier:
     name: internet-monitoring-front-tier
   back-tier:
@@ -16,15 +15,15 @@ services:
   portainer:
     image: portainer/portainer-ce:latest
     ports:
-      - 9443:9443
       - 9000:9000
-      - 8000:8000
+      # - 9443:9443
+      # - 8000:8000
     volumes:
       - portainer_data:/data
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
     networks:
-      - default
+      - front-tier
 
   nodeexp:
     image: prom/node-exporter:latest
@@ -152,6 +151,6 @@ services:
     volumes:
       - ./templates:/usr/share/nginx/html:ro
     ports:
-      - "8080:80"
+      - 8080:80
     networks:
-      - default
+      - front-tier
