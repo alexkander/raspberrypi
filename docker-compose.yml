@@ -80,7 +80,7 @@ services:
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./config/prometheus/:/etc/prometheus/
+      - prometheus_data:/etc/prometheus/
       - ./volumens/prometheus:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -102,7 +102,7 @@ services:
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./volumens/grafana:/var/lib/grafana
+      - grafana_data:/var/lib/grafana
       - ./config/grafana/provisioning/:/etc/grafana/provisioning/
     depends_on:
       - prometheus
