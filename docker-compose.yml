@@ -1,6 +1,7 @@
 version: '3.4'
 
 volumes:
+  portainer_data: {}
   prometheus_data: {}
   grafana_data: {}
 
@@ -12,114 +13,14 @@ networks:
     name: internet-monitoring-back-tier
 
 services:
-  web:
-    image: nginx
-    restart: always
+  portainer:
+    image: portainer/portainer-ce:latest
+    ports:
+      - 9443:9443
     volumes:
-      - ./templates:/usr/share/nginx/html:ro
-    ports:
-      - "8080:80"
-
-  samba:
-    image: dperson/samba:latest
-    container_name: samba
-    tty: true
-    restart: always
-    ports:
-      - "137:137/udp"
-      - "138:138/udp"
-      - "139:139/tcp"
-      - "445:445/tcp"
-    stdin_open: true
-    environment:
-      TZ: 'America/Lima'
-    networks:
-      - default
-    read_only: true
-    tmpfs:
-      - /tmp
-    volumes:
-      - ./files:/samba/files
-    command: '-u "alexpi;password;1000;alexpi;1000" -s "AlexPiDocs;/samba/files/alexpi;yes;no;yes;alexpi;alexpi;Alexpi documents"'
-
-  prometheus:
-    image: prom/prometheus:latest
-    restart: always
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./config/prometheus/:/etc/prometheus/
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--storage.tsdb.retention.time=90d'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
-    ports:
-      - 9090:9090
-    links:
-      - ping:ping
-      - speedtest:speedtest
-    networks:
-      - back-tier
-# {% if domain_name_enable and domain_name and domain_prometheus %}
-#     depends_on:
-#       - nginx-proxy
-#     environment:
-#       - VIRTUAL_HOST={{ domain_prometheus }}.{{ domain_name }}
-#       - VIRTUAL_PORT=9090
-# {% endif %}
-
-  grafana:
-    image: grafana/grafana:10.1.2
-    restart: always
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - grafana_data:/var/lib/grafana
-      - ./config/grafana/provisioning/:/etc/grafana/provisioning/
-    depends_on:
-      - prometheus
-    ports:
-      - 3030:3000
-    env_file:
-      - ./config/grafana/config.monitoring
-    networks:
-      - back-tier
-      - front-tier
-# {% if domain_name_enable and domain_name and domain_grafana %}
-#     depends_on:
-#       - nginx-proxy
-#     environment:
-#       - VIRTUAL_HOST=grafana.localhost:3030
-#       - VIRTUAL_PORT=3000
-# {% endif %}
-
-  ping:
-    image: prom/blackbox-exporter:latest
-    restart: always
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./config/blackbox/config:/config
-    expose:
-      - 9115
-    ports:
-      - 9115:9115
-    tty: true
-    stdin_open: true
-    command:
-      - '--config.file=/config/blackbox.yml'
-    networks:
-      - back-tier
-      
-  speedtest:
-    image: miguelndecarvalho/speedtest-exporter:latest
-    restart: always
-    expose:
-      - 9798
-    ports:
-      - 9798:9798
-    networks:
-      - back-tier
+      - portainer_data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
 
   nodeexp:
     image: prom/node-exporter:latest
@@ -139,3 +40,112 @@ services:
       - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
     networks:
       - back-tier
+
+  # samba:
+  #   image: dperson/samba:latest
+  #   container_name: samba
+  #   tty: true
+  #   restart: always
+  #   ports:
+  #     - "137:137/udp"
+  #     - "138:138/udp"
+  #     - "139:139/tcp"
+  #     - "445:445/tcp"
+  #   stdin_open: true
+  #   environment:
+  #     TZ: 'America/Lima'
+  #   networks:
+  #     - default
+  #   read_only: true
+  #   tmpfs:
+  #     - /tmp
+  #   volumes:
+  #     - ./files:/samba/files
+  #   command: '-u "alexpi;password;1000;alexpi;1000" -s "AlexPiDocs;/samba/files/alexpi;yes;no;yes;alexpi;alexpi;Alexpi documents"'
+
+  # prometheus:
+  #   image: prom/prometheus:latest
+  #   restart: always
+  #   volumes:
+  #     # - /etc/localtime:/etc/localtime:ro
+  #     - ./config/prometheus/:/etc/prometheus/
+  #     - prometheus_data:/prometheus
+  #   command:
+  #     - '--config.file=/etc/prometheus/prometheus.yml'
+  #     - '--storage.tsdb.path=/prometheus'
+  #     - '--storage.tsdb.retention.time=90d'
+  #     - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+  #     - '--web.console.templates=/usr/share/prometheus/consoles'
+  #   ports:
+  #     - 9090:9090
+  #   links:
+  #     - ping:ping
+  #     - speedtest:speedtest
+  #   networks:
+  #     - back-tier
+# {% if domain_name_enable and domain_name and domain_prometheus %}
+#     depends_on:
+#       - nginx-proxy
+#     environment:
+#       - VIRTUAL_HOST={{ domain_prometheus }}.{{ domain_name }}
+#       - VIRTUAL_PORT=9090
+# {% endif %}
+
+  # grafana:
+  #   image: grafana/grafana:10.1.2
+  #   restart: always
+  #   volumes:
+  #     # - /etc/localtime:/etc/localtime:ro
+  #     - grafana_data:/var/lib/grafana
+  #     - ./config/grafana/provisioning/:/etc/grafana/provisioning/
+  #   depends_on:
+  #     - prometheus
+  #   ports:
+  #     - 3030:3000
+  #   env_file:
+  #     - ./config/grafana/config.monitoring
+  #   networks:
+  #     - back-tier
+  #     - front-tier
+# {% if domain_name_enable and domain_name and domain_grafana %}
+#     depends_on:
+#       - nginx-proxy
+#     environment:
+#       - VIRTUAL_HOST=grafana.localhost:3030
+#       - VIRTUAL_PORT=3000
+# {% endif %}
+
+  # ping:
+  #   image: prom/blackbox-exporter:latest
+  #   restart: always
+  #   volumes:
+  #     - /etc/localtime:/etc/localtime:ro
+  #     - ./config/blackbox/config:/config
+  #   expose:
+  #     - 9115
+  #   ports:
+  #     - 9115:9115
+  #   tty: true
+  #   stdin_open: true
+  #   command:
+  #     - '--config.file=/config/blackbox.yml'
+  #   networks:
+  #     - back-tier
+      
+  # speedtest:
+  #   image: miguelndecarvalho/speedtest-exporter:latest
+  #   restart: always
+  #   expose:
+  #     - 9798
+  #   ports:
+  #     - 9798:9798
+  #   networks:
+  #     - back-tier
+
+  web:
+    image: nginx
+    restart: always
+    volumes:
+      - ./templates:/usr/share/nginx/html:ro
+    ports:
+      - "8080:80"
