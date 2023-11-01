@@ -1,7 +1,6 @@
 version: '3.4'
 
 volumes:
-  portainer_data: {}
   prometheus_data: {}
   grafana_data: {}
 
@@ -19,7 +18,7 @@ services:
       # - 9443:9443
       # - 8000:8000
     volumes:
-      - portainer_data:/data
+      - ./volumens/portainer/data:/data
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
     networks:
@@ -43,28 +42,6 @@ services:
       - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
     networks:
       - back-tier
-
-  # samba:
-  #   image: dperson/samba:latest
-  #   container_name: samba
-  #   tty: true
-  #   restart: always
-  #   ports:
-  #     - "137:137/udp"
-  #     - "138:138/udp"
-  #     - "139:139/tcp"
-  #     - "445:445/tcp"
-  #   stdin_open: true
-  #   environment:
-  #     TZ: 'America/Lima'
-  #   networks:
-  #     - default
-  #   read_only: true
-  #   tmpfs:
-  #     - /tmp
-  #   volumes:
-  #     - ./files:/samba/files
-  #   command: '-u "alexpi;password;1000;alexpi;1000" -s "AlexPiDocs;/samba/files/alexpi;yes;no;yes;alexpi;alexpi;Alexpi documents"'
 
   # prometheus:
   #   image: prom/prometheus:latest
@@ -144,6 +121,28 @@ services:
   #     - 9798:9798
   #   networks:
   #     - back-tier
+
+  samba:
+    image: dperson/samba:latest
+    container_name: samba
+    tty: true
+    restart: always
+    ports:
+      - "137:137/udp"
+      - "138:138/udp"
+      - "139:139/tcp"
+      - "445:445/tcp"
+    stdin_open: true
+    environment:
+      TZ: 'America/Lima'
+    read_only: true
+    tmpfs:
+      - /tmp
+    volumes:
+      - ./volumens/samba/files:/samba/files
+    command: '-u "alexpi;password;1000;alexpi;1000" -s "AlexPiDocs;/samba/files/alexpi;yes;no;yes;alexpi;alexpi;Alexpi documents"'
+    networks:
+      - default
 
   web:
     image: nginx
