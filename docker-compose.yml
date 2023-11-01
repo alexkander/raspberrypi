@@ -102,7 +102,7 @@ services:
     restart: always
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./volumens/grafana:/var/lib/grafana
+      - grafana_data:/var/lib/grafana
       - ./config/grafana/provisioning/:/etc/grafana/provisioning/
     depends_on:
       - prometheus
