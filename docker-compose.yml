@@ -61,7 +61,7 @@ services:
       - '--config.file=/config/blackbox.yml'
     networks:
       - back-tier
-      
+
   speedtest:
     image: miguelndecarvalho/speedtest-exporter:latest
     container_name: speedtest
