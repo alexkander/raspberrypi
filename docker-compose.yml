@@ -113,27 +113,27 @@ services:
       - back-tier
       - front-tier
 
-  # samba:
-  #   image: dperson/samba:latest
-  #   container_name: samba
-  #   tty: true
-  #   restart: always
-  #   ports:
-  #     - "137:137/udp"
-  #     - "138:138/udp"
-  #     - "139:139/tcp"
-  #     - "445:445/tcp"
-  #   stdin_open: true
-  #   environment:
-  #     TZ: 'America/Lima'
-  #   read_only: true
-  #   tmpfs:
-  #     - /tmp
-  #   volumes:
-  #     - ./volumens/samba/files:/samba/files
-  #   command: '-u "alexpi;password;1000;alexpi;1000" -s "AlexPiDocs;/samba/files/alexpi;yes;no;yes;alexpi;alexpi;Alexpi documents"'
-  #   networks:
-  #     - front-tier
+  samba:
+    image: dperson/samba:latest
+    container_name: samba
+    tty: true
+    restart: always
+    ports:
+      - "137:137/udp"
+      - "138:138/udp"
+      - "139:139/tcp"
+      - "445:445/tcp"
+    stdin_open: true
+    environment:
+      TZ: 'America/Lima'
+    read_only: true
+    tmpfs:
+      - /tmp
+    volumes:
+      - ./volumens/samba/files:/samba/files
+    command: '-u "alexpi;password;1000;alexpi;1000" -s "AlexPiDocs;/samba/files/alexpi;yes;no;yes;alexpi;alexpi;Alexpi documents"'
+    networks:
+      - front-tier
 
   # web:
   #   image: nginx
